@@ -8,17 +8,16 @@ const {
   EmbedBuilder,
   ActionRowBuilder,
   StringSelectMenuBuilder,
+  SlashCommandBuilder,
   Events,
-  ActivityType
+  ActivityType,
+  version: discordVersion
 } = require("discord.js");
-
-// ==========================================
-// PYRR OFFICIAL — CONFIGURATION
-// ==========================================
 
 const PREFIX = "P'";
 const BOT_NAME = "Pyrr Official";
 const TWITCH_URL = "https://www.twitch.tv/noctis_official01";
+const COLOR = 0x202127;
 
 const client = new Client({
   intents: [
@@ -27,259 +26,252 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMembers
   ],
-  partials: [
-    Partials.Channel,
-    Partials.Message
-  ]
+  partials: [Partials.Channel, Partials.Message]
 });
 
-// ==========================================
-// HELP CATEGORIES
-// ==========================================
+const startedAt = Date.now();
 
-const CATEGORIES = [
+const categories = [
   {
     label: "Economy",
     value: "economy",
-    description: "Earning, balance, profile and shop",
-    emoji: "💰"
+    emoji: "💰",
+    description: "Balance, earning and profiles"
   },
   {
     label: "Gambling",
     value: "gambling",
-    description: "Casual games and minigames",
-    emoji: "🎮"
+    emoji: "🎮",
+    description: "Casual games and challenges"
   },
   {
     label: "Utility",
     value: "utility",
-    description: "Useful tools and information",
-    emoji: "🛠️"
+    emoji: "🛠️",
+    description: "Useful tools and information"
   },
   {
     label: "Moderation",
     value: "moderation",
-    description: "Server moderation commands",
-    emoji: "🛡️"
+    emoji: "🛡️",
+    description: "Server moderation tools"
   },
   {
     label: "Automod",
     value: "automod",
-    description: "Automated moderation",
-    emoji: "🔒"
+    emoji: "🔒",
+    description: "Automated moderation"
   },
   {
     label: "System",
     value: "system",
-    description: "Tickets, verification and logs",
-    emoji: "⚙️"
+    emoji: "⚙️",
+    description: "Tickets, verification and logs"
   },
   {
     label: "Partnership",
     value: "partnership",
-    description: "Partnership tools and applications",
-    emoji: "🤝"
+    emoji: "🤝",
+    description: "Community partnerships"
   }
 ];
 
-// ==========================================
-// HELP EMBED
-// ==========================================
+const commandDocs = {
+  economy: [
+    ["P'daily", "Collect your daily reward."],
+    ["P'balance", "View your current balance."],
+    ["P'work", "Earn coins by working."]
+  ],
+  gambling: [
+    ["P'rps", "Play rock-paper-scissors."],
+    ["P'dice", "Roll a virtual die."]
+  ],
+  utility: [
+    ["P'help", "Open the interactive help menu."],
+    ["P'ping", "Check bot API latency."],
+    ["P'botinfo", "View bot information."],
+    ["P'userinfo", "View user information."],
+    ["P'serverinfo", "View server information."],
+    ["P'avatar", "View a user's avatar."],
+    ["P'uptime", "View the current bot uptime."]
+  ],
+  moderation: [
+    ["P'ban", "Ban a member with permission checks."],
+    ["P'kick", "Kick a member with permission checks."],
+    ["P'timeout", "Timeout a member with permission checks."]
+  ],
+  automod: [
+    ["P'automod", "Automod configuration is planned."]
+  ],
+  system: [
+    ["P'ticket", "Ticket system is planned."],
+    ["P'setwelcome", "Welcome configuration is planned."]
+  ],
+  partnership: [
+    ["P'partner", "Partnership tools are planned."]
+  ]
+};
 
-function makeHelpEmbed(category = null) {
-  const embed = new EmbedBuilder()
-    .setColor(0x242424)
-    .setTitle("Pyrr Help")
-    .setDescription(
-      "All Pyrr Official commands can be found here.\n\n" +
-      "**Pyrr Information:**\n" +
-      "> **7** Help Command Categories\n" +
-      "> **20** Planned System Help Sections\n" +
-      "> **250+** Target Commands\n\n" +
-      "**Choose a category:**\n" +
-      "Select an option from the menu below."
-    )
-    .setFooter({
-      text: "Pyrr Official • Support Bot"
-    });
-
-  if (!category) return embed;
-
-  const selected = CATEGORIES.find(
-    item => item.value === category
-  );
-
-  if (!selected) return embed;
-
-  const descriptions = {
-    economy:
-      "**Earning**\n" +
-      "`P'daily` `P'work` `P'balance`\n\n" +
-      "**Account**\n" +
-      "`P'deposit` `P'withdraw` `P'profile`\n\n" +
-      "**Shop**\n" +
-      "`P'shop` `P'buy` `P'inventory`",
-
-    gambling:
-      "**Casual Games**\n" +
-      "`P'dice` `P'rps` `P'ttt`\n\n" +
-      "**Trivia & Challenges**\n" +
-      "`P'trivia` `P'guess` `P'leaderboard`\n\n" +
-      "Casual minigames without real-money betting.",
-
-    utility:
-      "**General**\n" +
-      "`P'help` `P'ping` `P'uptime`\n\n" +
-      "**Information**\n" +
-      "`P'userinfo` `P'serverinfo` `P'avatar`\n\n" +
-      "**Tools**\n" +
-      "`P'calculate` `P'poll` `P'botinfo`",
-
-    moderation:
-      "**Moderation**\n" +
-      "`P'ban` `P'kick` `P'timeout`\n\n" +
-      "**Management**\n" +
-      "`P'warn` `P'purge` `P'lock` `P'unlock`\n\n" +
-      "**Roles**\n" +
-      "`P'role` `P'roleinfo` `P'rolelist`",
-
-    automod:
-      "**Protection**\n" +
-      "`P'antispam` `P'antilink`\n\n" +
-      "**Filters**\n" +
-      "`P'filter` `P'badwords` `P'automodlogs`\n\n" +
-      "Automod configuration requires appropriate permissions.",
-
-    system:
-      "**Support Systems**\n" +
-      "`P'ticket` `P'verify`\n\n" +
-      "**Configuration**\n" +
-      "`P'setwelcome` `P'setlogs`\n\n" +
-      "**Bot Information**\n" +
-      "`P'botinfo` `P'uptime`",
-
-    partnership:
-      "**Partnership**\n" +
-      "`P'partner` `P'partnerinfo`\n\n" +
-      "**Applications**\n" +
-      "`P'partnerapply` `P'partnerlist`\n\n" +
-      "**Management**\n" +
-      "`P'partneraccept` `P'partnerdeny`"
-  };
-
-  embed
-    .setTitle(`Pyrr Help • ${selected.label}`)
-    .setDescription(
-      `${selected.emoji} **${selected.label}**\n\n` +
-      selected.description +
-      "\n\n" +
-      descriptions[category]
-    );
-
-  return embed;
+function makeEmbed() {
+  return new EmbedBuilder()
+    .setColor(COLOR)
+    .setTimestamp();
 }
 
-// ==========================================
-// CATEGORY SELECT MENU
-// ==========================================
+function makeHomeEmbed() {
+  return makeEmbed()
+    .setAuthor({
+      name: "PYRR OFFICIAL • SUPPORT SYSTEM",
+      iconURL: client.user.displayAvatarURL()
+    })
+    .setTitle("Pyrr Help Center")
+    .setDescription(
+      "Welcome to **Pyrr Official**.\n" +
+      "Your community management assistant.\n\n" +
+      "```ansi\n\u001b[1;37mPYRR INFORMATION\u001b[0m\n```\n" +
+      "› **7** command categories\n" +
+      "› **250+** planned command target\n" +
+      "› Prefix: `P'`\n" +
+      "› Slash command: `/help`\n\n" +
+      "**Select a category below** to explore the command reference."
+    )
+    .addFields(
+      {
+        name: "Support",
+        value: "Use the category selector below to browse commands.",
+        inline: false
+      },
+      {
+        name: "Twitch",
+        value: `[Noctis Official](${TWITCH_URL})`,
+        inline: true
+      },
+      {
+        name: "Status",
+        value: "Help system online",
+        inline: true
+      }
+    )
+    .setFooter({
+      text: "Pyrr Official • Help Center",
+      iconURL: client.user.displayAvatarURL()
+    });
+}
 
-function makeCategoryRow() {
-  const menu = new StringSelectMenuBuilder()
+function makeCategoryEmbed(value) {
+  const category = categories.find(
+    item => item.value === value
+  );
+
+  if (!category) return makeHomeEmbed();
+
+  const docs = commandDocs[value] || [];
+
+  const commandText = docs.length
+    ? docs.map(([name, description]) =>
+        `\`${name}\` — ${description}`
+      ).join("\n")
+    : "No commands are listed in this category yet.";
+
+  return makeEmbed()
+    .setAuthor({
+      name: "PYRR OFFICIAL • COMMAND DIRECTORY",
+      iconURL: client.user.displayAvatarURL()
+    })
+    .setTitle(`${category.emoji} ${category.label}`)
+    .setDescription(
+      `${category.description}\n\n` +
+      "**Command Reference**\n" +
+      commandText
+    )
+    .setFooter({
+      text: "Pyrr Official • Select another category below"
+    });
+}
+
+function makeMenu() {
+  const select = new StringSelectMenuBuilder()
     .setCustomId("pyrr_help_category")
-    .setPlaceholder("Choose a command category")
+    .setPlaceholder("Browse command categories")
     .addOptions(
-      CATEGORIES.map(category => ({
-        label: category.label,
-        value: category.value,
-        description: category.description,
-        emoji: category.emoji
+      categories.map(item => ({
+        label: item.label,
+        value: item.value,
+        description: item.description,
+        emoji: item.emoji
       }))
     );
 
-  return new ActionRowBuilder().addComponents(menu);
+  return new ActionRowBuilder().addComponents(select);
 }
 
-// ==========================================
-// BOT READY + TWITCH STREAMING STATUS
-// ==========================================
+async function showHelp(target) {
+  return target.reply({
+    embeds: [makeHomeEmbed()],
+    components: [makeMenu()]
+  });
+}
 
-client.once(Events.ClientReady, readyClient => {
-  console.log("================================");
-  console.log(`${BOT_NAME} is online!`);
-  console.log(`Logged in as: ${readyClient.user.tag}`);
+client.once(Events.ClientReady, ready => {
+  console.log("--------------------------------");
+  console.log(`${BOT_NAME} is online`);
+  console.log(`Logged in as ${ready.user.tag}`);
   console.log(`Prefix: ${PREFIX}`);
-  console.log(`Twitch: ${TWITCH_URL}`);
-  console.log("================================");
+  console.log(`Discord.js: ${discordVersion}`);
+  console.log("--------------------------------");
 
-  readyClient.user.setActivity({
+  ready.user.setActivity({
     name: "Noctis Official",
     type: ActivityType.Streaming,
     url: TWITCH_URL
   });
 });
 
-// ==========================================
-// PREFIX COMMAND HANDLER
-// ==========================================
+// PREFIX COMMANDS
 
 client.on(Events.MessageCreate, async message => {
-  if (message.author.bot) return;
-  if (!message.guild) return;
+  if (message.author.bot || !message.guild) return;
 
   if (
     !message.content
       .toLowerCase()
       .startsWith(PREFIX.toLowerCase())
-  ) {
-    return;
-  }
+  ) return;
 
-  const input = message.content
-    .slice(PREFIX.length)
-    .trim();
-
+  const input = message.content.slice(PREFIX.length).trim();
   if (!input) return;
 
-  const args = input.split(/\s+/);
-  const command = args.shift().toLowerCase();
+  const parts = input.split(/\s+/);
+  const command = parts.shift().toLowerCase();
 
   try {
-    // HELP
     if (command === "help") {
-      return message.reply({
-        embeds: [makeHelpEmbed()],
-        components: [makeCategoryRow()]
-      });
+      return await showHelp(message);
     }
 
-    // PING
     if (command === "ping") {
-      const sent = await message.reply(
-        "🏓 Checking latency..."
-      );
-
+      const sent = await message.reply("Checking latency...");
       return sent.edit(
-        `🏓 Pong! API latency: ${client.ws.ping} ms`
+        `🏓 **Pong!**\nAPI latency: \`${client.ws.ping}ms\``
       );
     }
 
-    // BOT INFO
     if (command === "botinfo") {
-      const embed = new EmbedBuilder()
-        .setColor(0x242424)
-        .setTitle(BOT_NAME)
+      const embed = makeEmbed()
+        .setTitle("Pyrr Official")
+        .setThumbnail(client.user.displayAvatarURL())
         .setDescription(
-          "Official Pyrr support bot information."
+          "Professional tools for your Discord community."
         )
         .addFields(
           {
             name: "Servers",
-            value: String(client.guilds.cache.size),
+            value: `${client.guilds.cache.size}`,
             inline: true
           },
           {
-            name: "Users Cached",
-            value: String(client.users.cache.size),
+            name: "Users cached",
+            value: `${client.users.cache.size}`,
             inline: true
           },
           {
@@ -288,31 +280,57 @@ client.on(Events.MessageCreate, async message => {
             inline: true
           },
           {
+            name: "Discord.js",
+            value: discordVersion,
+            inline: true
+          },
+          {
             name: "Twitch",
-            value: `[Noctis Official](${TWITCH_URL})`
+            value: `[Noctis Official](${TWITCH_URL})`,
+            inline: true
           }
-        )
-        .setTimestamp();
+        );
+
+      return message.reply({ embeds: [embed] });
+    }
+
+    if (command === "uptime") {
+      const total = Math.floor(process.uptime());
+      const days = Math.floor(total / 86400);
+      const hours = Math.floor((total % 86400) / 3600);
+      const minutes = Math.floor((total % 3600) / 60);
+      const seconds = total % 60;
 
       return message.reply({
-        embeds: [embed]
+        embeds: [
+          makeEmbed()
+            .setTitle("⏱️ Pyrr Uptime")
+            .setDescription(
+              `**Online for:** ${days}d ${hours}h ${minutes}m ${seconds}s`
+            )
+        ]
       });
     }
 
-    // USER INFO
+    if (command === "avatar") {
+      const user =
+        message.mentions.users.first() || message.author;
+
+      const embed = makeEmbed()
+        .setTitle(`${user.username}'s Avatar`)
+        .setImage(user.displayAvatarURL({ size: 1024 }))
+        .setURL(user.displayAvatarURL({ size: 1024 }));
+
+      return message.reply({ embeds: [embed] });
+    }
+
     if (command === "userinfo") {
       const member =
-        message.mentions.members.first() ||
-        message.member;
+        message.mentions.members.first() || message.member;
 
-      const embed = new EmbedBuilder()
-        .setColor(0x242424)
+      const embed = makeEmbed()
         .setTitle("User Information")
-        .setThumbnail(
-          member.user.displayAvatarURL({
-            size: 256
-          })
-        )
+        .setThumbnail(member.user.displayAvatarURL({ size: 256 }))
         .addFields(
           {
             name: "Username",
@@ -326,174 +344,150 @@ client.on(Events.MessageCreate, async message => {
           },
           {
             name: "Joined Server",
-            value: member.joinedAt
-              ? `<t:${Math.floor(
-                  member.joinedAt.getTime() / 1000
-                )}:R>`
-              : "Unknown"
+            value: member.joinedTimestamp
+              ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:R>`
+              : "Unknown",
+            inline: true
           }
         );
 
-      return message.reply({
-        embeds: [embed]
-      });
+      return message.reply({ embeds: [embed] });
     }
 
-    // SERVER INFO
     if (command === "serverinfo") {
       const guild = message.guild;
 
-      const embed = new EmbedBuilder()
-        .setColor(0x242424)
+      const embed = makeEmbed()
         .setTitle(guild.name)
-        .setThumbnail(
-          guild.iconURL({ size: 256 })
-        )
+        .setThumbnail(guild.iconURL({ size: 256 }))
         .addFields(
           {
-            name: "Server ID",
-            value: guild.id
-          },
-          {
             name: "Members",
-            value: String(guild.memberCount),
+            value: `${guild.memberCount}`,
             inline: true
           },
           {
             name: "Channels",
-            value: String(
-              guild.channels.cache.size
-            ),
+            value: `${guild.channels.cache.size}`,
             inline: true
           },
           {
             name: "Created",
-            value: `<t:${Math.floor(
-              guild.createdTimestamp / 1000
-            )}:D>`
+            value: `<t:${Math.floor(guild.createdTimestamp / 1000)}:D>`,
+            inline: false
           }
         );
 
-      return message.reply({
-        embeds: [embed]
-      });
-    }
-
-    // AVATAR
-    if (command === "avatar") {
-      const user =
-        message.mentions.users.first() ||
-        message.author;
-
-      const embed = new EmbedBuilder()
-        .setColor(0x242424)
-        .setTitle(`${user.username}'s Avatar`)
-        .setImage(
-          user.displayAvatarURL({
-            size: 1024
-          })
-        );
-
-      return message.reply({
-        embeds: [embed]
-      });
-    }
-
-    // UPTIME
-    if (command === "uptime") {
-      const total = Math.floor(
-        client.uptime / 1000
-      );
-
-      const days = Math.floor(total / 86400);
-      const hours = Math.floor(
-        (total % 86400) / 3600
-      );
-      const minutes = Math.floor(
-        (total % 3600) / 60
-      );
-      const seconds = total % 60;
-
-      return message.reply(
-        `⏱️ Uptime: ${days}d ${hours}h ${minutes}m ${seconds}s`
-      );
+      return message.reply({ embeds: [embed] });
     }
 
   } catch (error) {
-    console.error(
-      `Command error (${command}):`,
-      error
-    );
+    console.error(`Command ${command} failed:`, error);
 
     await message.reply(
-      "An error occurred while running this command."
+      "Something went wrong while executing this command."
     ).catch(() => {});
   }
 });
 
-// ==========================================
-// HELP CATEGORY INTERACTIONS
-// ==========================================
+// SLASH COMMANDS + HELP MENU
 
-client.on(
-  Events.InteractionCreate,
-  async interaction => {
-    if (!interaction.isStringSelectMenu()) {
+client.on(Events.InteractionCreate, async interaction => {
+  try {
+    if (interaction.isChatInputCommand()) {
+      if (interaction.commandName === "help") {
+        return await showHelp(interaction);
+      }
+
+      if (interaction.commandName === "ping") {
+        return interaction.reply({
+          embeds: [
+            makeEmbed()
+              .setTitle("🏓 Pong!")
+              .setDescription(
+                `API latency: \`${client.ws.ping}ms\``
+              )
+          ],
+          ephemeral: true
+        });
+      }
+
+      if (interaction.commandName === "botinfo") {
+        return interaction.reply({
+          embeds: [
+            makeEmbed()
+              .setTitle("Pyrr Official")
+              .setThumbnail(client.user.displayAvatarURL())
+              .setDescription(
+                `Prefix: \`${PREFIX}\`\n` +
+                `[Twitch: Noctis Official](${TWITCH_URL})`
+              )
+              .addFields(
+                {
+                  name: "Servers",
+                  value: `${client.guilds.cache.size}`,
+                  inline: true
+                },
+                {
+                  name: "Discord.js",
+                  value: discordVersion,
+                  inline: true
+                }
+              )
+          ],
+          ephemeral: true
+        });
+      }
+
       return;
     }
 
     if (
-      interaction.customId !==
-      "pyrr_help_category"
-    ) {
-      return;
-    }
+      !interaction.isStringSelectMenu() ||
+      interaction.customId !== "pyrr_help_category"
+    ) return;
 
-    const category = interaction.values[0];
+    const value = interaction.values[0];
 
-    if (
-      !CATEGORIES.some(
-        item => item.value === category
-      )
-    ) {
+    if (!categories.some(item => item.value === value)) {
       return interaction.reply({
-        content: "Invalid help category.",
+        content: "Invalid category selection.",
         ephemeral: true
       });
     }
 
-    try {
-      await interaction.update({
-        embeds: [makeHelpEmbed(category)],
-        components: [makeCategoryRow()]
-      });
-    } catch (error) {
-      console.error(
-        "Help menu interaction error:",
-        error
-      );
+    await interaction.update({
+      embeds: [makeCategoryEmbed(value)],
+      components: [makeMenu()]
+    });
+
+  } catch (error) {
+    console.error("Interaction error:", error);
+
+    if (!interaction.isRepliable()) return;
+
+    const response = {
+      content: "The request failed. Please try again.",
+      ephemeral: true
+    };
+
+    if (interaction.deferred || interaction.replied) {
+      await interaction.followUp(response).catch(() => {});
+    } else {
+      await interaction.reply(response).catch(() => {});
     }
   }
-);
+});
 
-// ==========================================
 // LOGIN
-// ==========================================
 
 if (!process.env.DISCORD_TOKEN) {
-  console.error(
-    "Missing DISCORD_TOKEN environment variable."
-  );
+  console.error("DISCORD_TOKEN is missing.");
   process.exit(1);
 }
 
-client.login(process.env.DISCORD_TOKEN).catch(
-  error => {
-    console.error(
-      "Login failed. Check the token and bot configuration."
-    );
-    console.error(error.message);
-    process.exit(1);
-  }
-);
-      
+client.login(process.env.DISCORD_TOKEN).catch(error => {
+  console.error("Bot login failed:", error.message);
+  process.exit(1);
+});
+  
