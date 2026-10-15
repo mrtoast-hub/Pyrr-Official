@@ -1,8 +1,8 @@
 
 {
   "name": "pyrr-official",
-  "version": "1.0.0",
-  "description": "Pyrr Official Discord Support Bot",
+  "version": "2.0.0",
+  "description": "Pyrr Official Discord Bot",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
