@@ -1678,27 +1678,7 @@ registerCommand({
     }
 });
 
-registerCommand({
-    name: "invite",
-    description: "Get the bot invite link",
-    category: "Utility",
-    execute: async (ctx) => {
-        const clientId = process.env.CLIENT_ID || ctx.client.user.id;
 
-        const inviteUrl =
-            `https://discord.com/oauth2/authorize?client_id=${clientId}` +
-            `&permissions=8&scope=bot%20applications.commands`;
-
-        return ctx.reply({
-            embeds: [
-                new EmbedBuilder()
-                    .setColor(0x5865f2)
-                    .setTitle("➕ Invite PYRR OFFICIAL")
-                    .setDescription(`[Click here to invite the bot](${inviteUrl})`)
-            ]
-        });
-    }
-});
 
 // END PART 3/20// ============================================
 // PART 4/20 — MODERATION COMMANDS
