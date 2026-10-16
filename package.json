@@ -1,0 +1,17 @@
+{
+  "name": "pyrr-official",
+  "version": "3.0.0",
+  "description": "PYRR OFFICIAL Discord bot — prefix command build",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "check": "node --check index.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "discord.js": "^14.19.3"
+  }
+}
