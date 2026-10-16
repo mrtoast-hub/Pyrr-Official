@@ -2092,14 +2092,40 @@ registerCommand({
     });
 });
 
+
+registerCommand({
+    name: "lock",
+    description: "Lock the current channel",
+    category: "Moderation",
+    execute: async (ctx) => {
+        if (!requireGuild(ctx)) return;
+        if (!(await requireModerator(ctx, "ManageChannels"))) return;
+        if (!(await requireBotPermission(ctx, "ManageChannels"))) return;
+
+        await ctx.channel.permissionOverwrites.edit(
+            ctx.guild.roles.everyone,
+            { SendMessages: false }
+        );
+
+        return ctx.reply({
+            embeds: [
+                successEmbed(
+                    "Channel Locked",
+                    `🔒 ${ctx.channel} has been locked.`
+                )
+            ]
+        });
+    }
+});
+
 registerCommand({
     name: "unlock",
     description: "Unlock the current channel",
     category: "Moderation",
     execute: async (ctx) => {
         if (!requireGuild(ctx)) return;
-        if (!requireModerator(ctx, "ManageChannels")) return;
-        if (!requireBotPermission(ctx, "ManageChannels")) return;
+        if (!(await requireModerator(ctx, "ManageChannels"))) return;
+        if (!(await requireBotPermission(ctx, "ManageChannels"))) return;
 
         await ctx.channel.permissionOverwrites.edit(
             ctx.guild.roles.everyone,
@@ -2116,6 +2142,7 @@ registerCommand({
         });
     }
 });
+
 
 registerCommand({
     name: "slowmode",
