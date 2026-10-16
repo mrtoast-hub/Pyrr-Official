@@ -1349,14 +1349,7 @@ registerCommand({
 
 
 
-        await poll.react("👍").catch(() => {});
-        await poll.react("👎").catch(() => {});
 
-        return ctx.reply({
-            content: "Poll created."
-        });
-    }
-});
 
 registerCommand({
     name: "choose",
