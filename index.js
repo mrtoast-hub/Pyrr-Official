@@ -1989,24 +1989,33 @@ registerCommand({
 
 // ----- UNLOCK CHANNEL -----
 
+
 registerCommand({
     name: "unlock",
-    description: "Unlock the current text channel.",
+    description: "Unlock the current channel",
     category: "Moderation",
-    execute: async ctx => {
-        if (!await checkModerationPermission(ctx, "ManageChannels")) {
-            return;
-        }
-
+    slash: false,
+    execute: async (ctx) => {
+        if (!requireGuild(ctx)) return;
+        if (!await requireModerator(ctx, "ManageChannels")) return;
         if (!await requireBotPermission(ctx, "ManageChannels")) return;
 
-        if (!ctx.channel?.permissionOverwrites) {
-            return ctx.reply({
-                embeds: [
-                    errorEmbed("Unsupported Channel", "This channel cannot be unlocked.")
-                ]
-            });
-        }
+        await ctx.channel.permissionOverwrites.edit(
+            ctx.guild.roles.everyone,
+            { SendMessages: null }
+        );
+
+        return ctx.reply({
+            embeds: [
+                successEmbed(
+                    "Channel Unlocked",
+                    "This channel is now unlocked."
+                )
+            ]
+        });
+    }
+});
+
 
         await ctx.channel.permissionOverwrites.edit(
     ctx.guild.roles.everyone,
