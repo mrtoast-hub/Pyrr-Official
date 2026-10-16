@@ -2009,9 +2009,9 @@ registerCommand({
         }
 
         await ctx.channel.permissionOverwrites.edit(
-            ctx.guild.roles.everyone,
-            { SendMessages: nu
-ll
+    ctx.guild.roles.everyone,
+    { SendMessages: null }
+);
         }
     );
 
