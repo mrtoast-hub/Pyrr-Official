@@ -1347,42 +1347,7 @@ registerCommand({
     }
 });
 
-registerCommand({
-    name: "poll",
-    description: "Create a yes or no poll",
-    category: "Utility",
-    usage: ",poll <question>",
-    execute: async (ctx) => {
-        const question = String(ctx.args?.join(" ") || "").trim();
 
-        if (!question) {
-            return ctx.reply({
-                content: "Usage: `,poll <question>`"
-            });
-        }
-
-        if (question.length > 1500) {
-            return ctx.reply({
-                content: "Please keep the question under 1500 characters."
-            });
-        }
-
-        const poll = await ctx.channel.send({
-            embeds: [
-                new EmbedBuilder()
-                    .setColor(0x5865f2)
-                    .setTitle("📊 Community Poll")
-                    .setDescription(question)
-                    .addFields(
-                        { name: "Option 1", value: "👍 Yes", inline: true },
-                        { name: "Option 2", value: "👎 No", inline: true }
-                    )
-                    .setFooter({
-                        text: `Poll by ${ctx.user.username}`
-                    })
-                    .setTimestamp()
-            ]
-        });
 
         await poll.react("👍").catch(() => {});
         await poll.react("👎").catch(() => {});
