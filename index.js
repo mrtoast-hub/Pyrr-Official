@@ -1425,47 +1425,7 @@ registerCommand({
 });
 
 registerCommand({
-    name: "8ball",
-    description: "Ask the magic 8-ball a question",
-    category: "Fun",
-    usage: ",8ball <question>",
-    execute: async (ctx) => {
-        const question = String(ctx.args?.join(" ") || "").trim();
 
-        if (!question) {
-            return ctx.reply({
-                content: "Usage: `,8ball <question>`"
-            });
-        }
-
-        const answers = [
-            "Yes, definitely.",
-            "It is likely.",
-            "Signs point to yes.",
-            "Ask again later.",
-            "Cannot predict that right now.",
-            "Probably not.",
-            "My answer is no.",
-            "The outlook is uncertain."
-        ];
-
-        const answer = answers[
-            Math.floor(Math.random() * answers.length)
-        ];
-
-        return ctx.reply({
-            embeds: [
-                new EmbedBuilder()
-                    .setColor(0x5865f2)
-                    .setTitle("🎱 Magic 8-Ball")
-                    .addFields(
-                        { name: "Question", value: question.slice(0, 1000) },
-                        { name: "Answer", value: answer }
-                    )
-            ]
-        });
-    }
-});
 
 registerCommand({
     name: "howgay",
