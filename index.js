@@ -1950,71 +1950,129 @@ registerCommand({
     }
 });
 
-// ----- LOCK CHANNEL -----
+
+/* =========================
+   LOCK CHANNEL
+========================= */
 
 registerCommand({
     name: "lock",
     description: "Lock the current text channel.",
     category: "Moderation",
-    execute: async ctx => {
+    slash: false,
+
+    execute: async (ctx) => {
+        if (!requireGuild(ctx)) return;
+
         if (!await checkModerationPermission(ctx, "ManageChannels")) {
             return;
         }
 
-        if (!await requireBotPermission(ctx, "ManageChannels")) return;
+        if (!await requireBotPermission(ctx, "ManageChannels")) {
+            return;
+        }
 
         if (!ctx.channel?.permissionOverwrites) {
             return ctx.reply({
                 embeds: [
-                    errorEmbed("Unsupported Channel", "This channel cannot be locked.")
+                    errorEmbed(
+                        "Unsupported Channel",
+                        "This channel cannot be locked."
+                    )
                 ]
             });
         }
 
-        await ctx.channel.permissionOverwrites.edit(
-            ctx.guild.roles.everyone,
-            { SendMessages: false }
-        );
+        try {
+            await ctx.channel.permissionOverwrites.edit(
+                ctx.guild.roles.everyone,
+                { SendMessages: false }
+            );
 
-        return ctx.reply({
-            embeds: [
-                successEmbed(
-                    "Channel Locked",
-                    `${ctx.channel} has been locked.`
-                )
-            ]
-        });
+            return ctx.reply({
+                embeds: [
+                    successEmbed(
+                        "Channel Locked",
+                        `🔒 ${ctx.channel} has been locked.`
+                    )
+                ]
+            });
+        } catch (error) {
+            console.error("[LOCK ERROR]", error);
+
+            return ctx.reply({
+                embeds: [
+                    errorEmbed(
+                        "Lock Failed",
+                        "I couldn't lock this channel. Check my Manage Channels permission and role settings."
+                    )
+                ]
+            });
+        }
     }
 });
 
-// ----- UNLOCK CHANNEL -----
-
+/* =========================
+   UNLOCK CHANNEL
+========================= */
 
 registerCommand({
     name: "unlock",
-    description: "Unlock the current channel",
+    description: "Unlock the current text channel.",
     category: "Moderation",
     slash: false,
+
     execute: async (ctx) => {
         if (!requireGuild(ctx)) return;
-        if (!await requireModerator(ctx, "ManageChannels")) return;
-        if (!await requireBotPermission(ctx, "ManageChannels")) return;
 
-        await ctx.channel.permissionOverwrites.edit(
-            ctx.guild.roles.everyone,
-            { SendMessages: null }
-        );
+        if (!await checkModerationPermission(ctx, "ManageChannels")) {
+            return;
+        }
 
-        return ctx.reply({
-            embeds: [
-                successEmbed(
-                    "Channel Unlocked",
-                    "This channel is now unlocked."
-                )
-            ]
-        });
+        if (!await requireBotPermission(ctx, "ManageChannels")) {
+            return;
+        }
+
+        if (!ctx.channel?.permissionOverwrites) {
+            return ctx.reply({
+                embeds: [
+                    errorEmbed(
+                        "Unsupported Channel",
+                        "This channel cannot be unlocked."
+                    )
+                ]
+            });
+        }
+
+        try {
+            await ctx.channel.permissionOverwrites.edit(
+                ctx.guild.roles.everyone,
+                { SendMessages: null }
+            );
+
+            return ctx.reply({
+                embeds: [
+                    successEmbed(
+                        "Channel Unlocked",
+                        `🔓 ${ctx.channel} has been unlocked.`
+                    )
+                ]
+            });
+        } catch (error) {
+            console.error("[UNLOCK ERROR]", error);
+
+            return ctx.reply({
+                embeds: [
+                    errorEmbed(
+                        "Unlock Failed",
+                        "I couldn't unlock this channel. Check my Manage Channels permission and role settings."
+                    )
+                ]
+            });
+        }
     }
 });
+                 
 
 
         await ctx.channel.permissionOverwrites.edit(
